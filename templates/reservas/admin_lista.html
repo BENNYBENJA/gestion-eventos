@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Administración de Reservas{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main);">📋 Gestión de Reservas</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Panel de control administrativo &bull; Registro y control de inscripciones</p>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div class="filter-card">
+  <form method="get" class="filter-form">
+    <div class="form-group" style="margin-bottom:0;">
+      <label for="evento">Filtrar por Evento</label>
+      <select name="evento" id="evento" class="form-control-custom">
+        <option value="">-- Todos los eventos --</option>
+        {% for ev in eventos %}
+          <option value="{{ ev.id }}" {% if filtro_evento == ev.id|stringformat:"s" %}selected{% endif %}>
+            {{ ev.nombre }} ({{ ev.fecha|date:"d/m/Y" }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom:0;">
+      <label for="usuario">Buscar por Email de Usuario</label>
+      <input type="text" name="usuario" id="usuario" class="form-control-custom" placeholder="usuario@demo.cl" value="{{ filtro_usuario }}">
+    </div>
+
+    <div class="form-group" style="margin-bottom:0;">
+      <label for="fecha">Fecha del Evento</label>
+      <input type="date" name="fecha" id="fecha" class="form-control-custom" value="{{ filtro_fecha|default:'' }}">
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+      <button type="submit" class="btn-custom btn-primary-custom">Filtrar</button>
+      <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-outline-custom">Limpiar</a>
+    </div>
+  </form>
+</div>
+
+<!-- Tabla de Reservas -->
+<div class="table-card table-responsive">
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th>#ID</th>
+        <th>Evento</th>
+        <th>Fecha Evento</th>
+        <th>Usuario</th>
+        <th>Plazas</th>
+        <th>Asistentes</th>
+        <th>Estado</th>
+        <th>Fecha Reserva</th>
+        <th style="text-align: right;">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reservas %}
+        <tr>
+          <td><strong>#{{ r.id }}</strong></td>
+          <td>
+            <strong>{{ r.evento.nombre }}</strong>
+          </td>
+          <td>{{ r.evento.fecha|date:"d/m/Y" }} {{ r.evento.hora|time:"H:i" }}</td>
+          <td>
+            {{ r.usuario.get_full_name|default:r.usuario.email }}<br>
+            <small style="color: var(--text-muted);">{{ r.usuario.email }}</small>
+          </td>
+          <td><strong>{{ r.plazas }}</strong></td>
+          <td>
+            {% if r.asistentes is not None %}
+              <span style="font-weight: 700; color: var(--success);">{{ r.asistentes }} / {{ r.plazas }}</span>
+            {% else %}
+              <span style="color: var(--text-muted); font-style: italic;">Pendiente</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.estado == 'VIGENTE' %}
+              <span class="status-badge badge-vigente">Vigente</span>
+            {% else %}
+              <span class="status-badge badge-cancelada">Cancelada</span>
+              {% if r.cancelada_por %}
+                <br><small style="font-size:0.75rem; color:var(--text-muted);">por {{ r.cancelada_por.email }}</small>
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
+          <td style="text-align: right; white-space: nowrap;">
+            {% if r.estado == 'VIGENTE' %}
+              <a href="{% url 'reservas:admin_asistentes' r.id %}" class="btn-custom btn-outline-custom btn-sm-custom" title="Registrar asistencia">
+                👥 Asistencia
+              </a>
+              {% if r.asistentes is None %}
+                <a href="{% url 'reservas:admin_cancelar' r.id %}" class="btn-custom btn-danger-custom btn-sm-custom" title="Cancelar reserva">
+                  ✕ Cancelar
+                </a>
+              {% else %}
+                <button class="btn-custom btn-sm-custom" disabled style="opacity: 0.5; cursor: not-allowed;" title="No se puede cancelar con asistencia registrada">
+                  ✕ Cancelar
+                </button>
+              {% endif %}
+            {% else %}
+              <span style="font-size: 0.8rem; color: var(--text-muted);">&mdash;</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="9" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+            No se encontraron reservas con los criterios seleccionados.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

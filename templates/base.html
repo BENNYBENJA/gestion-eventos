@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Gestión de Eventos y Reservas{% endblock %} - Centro Comunitario</title>
+  
+  <!-- Bootstrap 5 Grid CDN (ligero para layout responsivo) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css">
+  
+  <!-- CSS propio del prototipo -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- Barra de navegación principal -->
+  <nav class="main-navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">
+        <span>🏛️</span>
+        <span>Centro Comunitario</span>
+      </a>
+      
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">📅 Catálogo de Eventos</a></li>
+        
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'reservas:mis_inscripciones' %}" class="nav-link">🎟️ Mis Inscripciones</a></li>
+          
+          {% if user.es_admin %}
+            <li><a href="{% url 'eventos:admin_eventos' %}" class="nav-link">⚙️ Gestión Eventos</a></li>
+            <li><a href="{% url 'reservas:admin_reservas' %}" class="nav-link">📋 Reservas Admin</a></li>
+            <li><a href="{% url 'reportes:home' %}" class="nav-link">📊 Reportes</a></li>
+          {% endif %}
+          
+          <li style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 0.875rem; color: var(--text-muted);">
+              {{ user.get_short_name|default:user.email }}
+              {% if user.es_admin %}
+                <span class="nav-user-badge badge-admin">Admin</span>
+              {% else %}
+                <span class="nav-user-badge badge-user">Usuario</span>
+              {% endif %}
+            </span>
+            <form action="{% url 'cuentas:logout' %}" method="post" style="display:inline; margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="btn-custom btn-outline-custom btn-sm-custom" style="padding: 0.2rem 0.6rem; cursor: pointer;">
+                Salir
+              </button>
+            </form>
+          </li>
+        {% else %}
+          <li>
+            <a href="{% url 'cuentas:login' %}" class="btn-custom btn-primary-custom btn-sm-custom">
+              🔐 Iniciar Sesión
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Mensajes y contenido principal -->
+  <main class="page-container">
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="alert-custom {{ message.tags }}">
+            <div>
+              {% if message.tags == 'success' %}✅{% elif message.tags == 'error' or message.tags == 'danger' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+              <strong>{{ message }}</strong>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- Pie de página -->
+  <footer class="main-footer">
+    <div class="container">
+      <p><strong>Sistema de Gestión de Eventos y Reservas</strong> &copy; 2026 Centro Comunitario</p>
+      <p style="font-size: 0.8rem; margin-top: 0.25rem;">Prototipo Académico de Ingeniería de Software &bull; Django 5 + MySQL</p>
+    </div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

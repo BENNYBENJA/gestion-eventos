@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'eventos:catalogo' %}">Eventos</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ evento.nombre }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+
+    <!-- Info principal -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="card-header py-3 px-4" style="background: linear-gradient(135deg,#0d6efd,#6610f2);">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="text-white fw-bold mb-0">{{ evento.nombre }}</h3>
+            {% if evento.plazas_disponibles == 0 %}
+            <span class="badge bg-danger fs-6 px-3"><i class="bi bi-lock-fill me-1"></i>LLENO</span>
+            {% elif evento.porcentaje_ocupacion >= 75 %}
+            <span class="badge bg-warning text-dark fs-6 px-3"><i class="bi bi-exclamation-triangle me-1"></i>Pocas plazas</span>
+            {% else %}
+            <span class="badge bg-success fs-6 px-3"><i class="bi bi-check-circle me-1"></i>Disponible</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- Meta info -->
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+              <div class="text-center p-3 rounded-3 bg-light">
+                <i class="bi bi-calendar3 fs-3 text-primary mb-1 d-block"></i>
+                <div class="small text-muted">Fecha</div>
+                <div class="fw-semibold">{{ evento.fecha|date:"d M Y" }}</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-center p-3 rounded-3 bg-light">
+                <i class="bi bi-clock fs-3 text-primary mb-1 d-block"></i>
+                <div class="small text-muted">Hora</div>
+                <div class="fw-semibold">{{ evento.hora|time:"H:i" }}</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-center p-3 rounded-3 bg-light">
+                <i class="bi bi-hourglass-split fs-3 text-primary mb-1 d-block"></i>
+                <div class="small text-muted">Duración</div>
+                <div class="fw-semibold">{{ evento.duracion_min }} min</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-center p-3 rounded-3 bg-light">
+                <i class="bi bi-people fs-3 text-primary mb-1 d-block"></i>
+                <div class="small text-muted">Capacidad</div>
+                <div class="fw-semibold">{{ evento.capacidad_maxima }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          {% if evento.descripcion %}
+          <h5 class="fw-semibold mb-2">Descripción</h5>
+          <p class="text-muted lh-lg">{{ evento.descripcion|linebreaksbr }}</p>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel reserva -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 rounded-3 sticky-top" style="top:1.5rem;">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-bookmark-star me-2 text-primary"></i>Reservar</h5>
+
+          <!-- Ocupación -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small mb-1">
+              <span class="text-muted">Plazas disponibles</span>
+              <span class="fw-semibold {% if evento.plazas_disponibles == 0 %}text-danger{% else %}text-success{% endif %}">
+                {{ evento.plazas_disponibles }} / {{ evento.capacidad_maxima }}
+              </span>
+            </div>
+            <div class="progress mb-1" style="height:10px;">
+              <div
+                class="progress-bar {% if evento.porcentaje_ocupacion >= 100 %}bg-danger{% elif evento.porcentaje_ocupacion >= 75 %}bg-warning{% else %}bg-success{% endif %}"
+                style="width:{{ evento.porcentaje_ocupacion }}%"
+                role="progressbar"
+              ></div>
+            </div>
+            <div class="text-end small text-muted">{{ evento.porcentaje_ocupacion }}% ocupado</div>
+          </div>
+
+          <hr>
+
+          {% if evento.plazas_disponibles > 0 %}
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'reservas:crear' evento.pk %}" class="btn btn-primary w-100 py-2 fw-semibold">
+              <i class="bi bi-bookmark-plus me-2"></i>Hacer una reserva
+            </a>
+            {% else %}
+            <div class="alert alert-info small mb-3 py-2">
+              <i class="bi bi-info-circle me-1"></i>
+              Debes iniciar sesión para reservar.
+            </div>
+            <a href="{% url 'cuentas:login' %}?next={% url 'reservas:crear' evento.pk %}" class="btn btn-primary w-100 py-2 fw-semibold">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+            </a>
+            {% endif %}
+          {% else %}
+          <div class="text-center py-3">
+            <i class="bi bi-lock-fill display-5 text-danger opacity-50"></i>
+            <p class="text-danger fw-semibold mt-2 mb-0">Evento completo</p>
+            <small class="text-muted">No quedan plazas disponibles.</small>
+          </div>
+          {% endif %}
+
+          <div class="mt-3">
+            <a href="{% url 'eventos:catalogo' %}" class="btn btn-outline-secondary w-100">
+              <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

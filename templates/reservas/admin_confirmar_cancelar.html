@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Confirmar Cancelación de Reserva{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="max-width: 550px;">
+  <div class="auth-card" style="border-top: 4px solid var(--danger);">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <span style="font-size: 3rem;">⚠️</span>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--danger); margin-top: 0.5rem;">
+        ¿Cancelar Reserva #{{ reserva.id }}?
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Esta acción liberará <strong>{{ reserva.plazas }} plaza(s)</strong> para el evento.
+      </p>
+    </div>
+
+    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+      <p><strong>Evento:</strong> {{ reserva.evento.nombre }}</p>
+      <p><strong>Fecha y Hora:</strong> {{ reserva.evento.fecha|date:"d/m/Y" }} a las {{ reserva.evento.hora|time:"H:i" }}</p>
+      <p><strong>Usuario:</strong> {{ reserva.usuario.email }} ({{ reserva.usuario.get_full_name }})</p>
+      <p><strong>Plazas reservadas:</strong> {{ reserva.plazas }}</p>
+      <p><strong>Fecha de inscripción:</strong> {{ reserva.fecha_hora|date:"d/m/Y H:i" }}</p>
+    </div>
+
+    {% if reserva.asistentes is not None %}
+      <div class="alert-custom error">
+        <div>❌ Esta reserva ya tiene asistencia registrada ({{ reserva.asistentes }} asistentes). La regla de negocio prohíbe cancelarla.</div>
+      </div>
+      <div style="text-align: center;">
+        <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-secondary-custom">
+          &larr; Volver al listado
+        </a>
+      </div>
+    {% else %}
+      <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-outline-custom">
+            No, volver
+          </a>
+          <button type="submit" class="btn-custom btn-danger-custom">
+            Sí, cancelar y liberar plazas
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

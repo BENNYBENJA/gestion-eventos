@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}{{ accion }} Evento{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:720px;">
+
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'eventos:admin_eventos' %}">Gestión de Eventos</a></li>
+      <li class="breadcrumb-item active">{{ accion }} Evento</li>
+    </ol>
+  </nav>
+
+  <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+    <div class="card-header py-3 px-4" style="background:linear-gradient(135deg,#0d6efd,#6610f2);">
+      <h4 class="text-white fw-bold mb-0">
+        <i class="bi bi-{% if accion == 'Crear' %}plus-circle{% else %}pencil-square{% endif %} me-2"></i>
+        {{ accion }} Evento
+      </h4>
+    </div>
+
+    <div class="card-body p-4">
+
+      {% if messages %}
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+          <!-- Nombre -->
+          <div class="col-12">
+            <label for="nombre" class="form-label fw-semibold">
+              Nombre <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              class="form-control form-control-lg"
+              placeholder="Ej: Taller de Django"
+              value="{{ evento.nombre|default:'' }}"
+              maxlength="200"
+              required
+            >
+          </div>
+
+          <!-- Fecha y Hora -->
+          <div class="col-sm-6">
+            <label for="fecha" class="form-label fw-semibold">
+              Fecha <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              id="fecha"
+              name="fecha"
+              class="form-control"
+              value="{{ evento.fecha|date:'Y-m-d'|default:'' }}"
+              required
+            >
+          </div>
+          <div class="col-sm-6">
+            <label for="hora" class="form-label fw-semibold">
+              Hora <span class="text-danger">*</span>
+            </label>
+            <input
+              type="time"
+              id="hora"
+              name="hora"
+              class="form-control"
+              value="{{ evento.hora|time:'H:i'|default:'' }}"
+              required
+            >
+          </div>
+
+          <!-- Duración y Capacidad -->
+          <div class="col-sm-6">
+            <label for="duracion_min" class="form-label fw-semibold">
+              Duración (minutos) <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="duracion_min"
+                name="duracion_min"
+                class="form-control"
+                placeholder="60"
+                value="{{ evento.duracion_min|default:'' }}"
+                min="1"
+                required
+              >
+              <span class="input-group-text">min</span>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <label for="capacidad_maxima" class="form-label fw-semibold">
+              Capacidad máxima <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-people"></i></span>
+              <input
+                type="number"
+                id="capacidad_maxima"
+                name="capacidad_maxima"
+                class="form-control"
+                placeholder="100"
+                value="{{ evento.capacidad_maxima|default:'' }}"
+                min="1"
+                required
+              >
+            </div>
+            {% if evento and evento.pk %}
+            <div class="form-text text-warning">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              No puede reducirse por debajo de las plazas ya reservadas.
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Descripción -->
+          <div class="col-12">
+            <label for="descripcion" class="form-label fw-semibold">Descripción</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              class="form-control"
+              rows="4"
+              placeholder="Descripción opcional del evento..."
+            >{{ evento.descripcion|default:'' }}</textarea>
+          </div>
+
+          <!-- Activo -->
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="activo"
+                name="activo"
+                {% if evento.activo or not evento %}checked{% endif %}
+              >
+              <label class="form-check-label fw-semibold" for="activo">
+                Publicar evento (visible en el catálogo)
+              </label>
+            </div>
+          </div>
+
+        </div><!-- /row -->
+
+        <hr class="my-4">
+
+        <div class="d-flex gap-2 justify-content-end">
+          <a href="{% url 'eventos:admin_eventos' %}" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-x-lg me-1"></i>Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary px-5 fw-semibold">
+            <i class="bi bi-{% if accion == 'Crear' %}plus-lg{% else %}check-lg{% endif %} me-1"></i>
+            {{ accion }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

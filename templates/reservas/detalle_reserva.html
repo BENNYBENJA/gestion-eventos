@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Detalle de Reserva #{{ reserva.id }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="max-width: 600px;">
+  <div class="auth-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">
+        🎟️ Comprobante de Reserva
+      </h1>
+      {% if reserva.estado == 'VIGENTE' %}
+        <span class="status-badge badge-vigente">Vigente</span>
+      {% else %}
+        <span class="status-badge badge-cancelada">Cancelada</span>
+      {% endif %}
+    </div>
+
+    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">
+        {{ reserva.evento.nombre }}
+      </h2>
+      <p style="margin-bottom: 0.5rem;"><strong>📅 Fecha:</strong> {{ reserva.evento.fecha|date:"l d de F de Y" }}</p>
+      <p style="margin-bottom: 0.5rem;"><strong>⏰ Hora:</strong> {{ reserva.evento.hora|time:"H:i" }} hrs ({{ reserva.evento.duracion_min }} min)</p>
+      <p style="margin-bottom: 0.5rem;"><strong>🎟️ Plazas Reservadas:</strong> {{ reserva.plazas }} persona(s)</p>
+      <p style="margin-bottom: 0.5rem;"><strong>👤 Titular:</strong> {{ reserva.usuario.get_full_name|default:reserva.usuario.email }}</p>
+      <p style="margin-bottom: 0.5rem;"><strong>📧 Correo:</strong> {{ reserva.usuario.email }}</p>
+      <p style="margin-bottom: 0.5rem;"><strong>🕒 Fecha de Solicitud:</strong> {{ reserva.fecha_hora|date:"d/m/Y H:i:s" }}</p>
+      
+      {% if reserva.asistentes is not None %}
+        <p style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px dashed var(--border-color); color: var(--success); font-weight: 600;">
+          ✅ Asistencia confirmada: {{ reserva.asistentes }} asistente(s) registrados.
+        </p>
+      {% endif %}
+
+      {% if reserva.estado == 'CANCELADA' %}
+        <div style="margin-top: 1rem; padding: 0.75rem; background-color: var(--danger-light); border-radius: var(--radius-sm); color: var(--danger); font-size: 0.85rem;">
+          Esta reserva fue cancelada el {{ reserva.fecha_cancelacion|date:"d/m/Y H:i" }}.
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="{% url 'reservas:mis_inscripciones' %}" class="btn-custom btn-outline-custom">
+        &larr; Mis Inscripciones
+      </a>
+      <a href="/" class="btn-custom btn-primary-custom">
+        Ver Más Eventos
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

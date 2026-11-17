@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Reserva – {{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="max-width: 580px;">
+  <div class="auth-card">
+    <div class="auth-header">
+      <span class="auth-icon">🎟️</span>
+      <h1>Confirmar Reserva</h1>
+      <p>Centro Comunitario &bull; Inscripción Oficial</p>
+    </div>
+
+    <!-- Resumen del evento -->
+    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">{{ evento.nombre }}</h3>
+      <p style="margin-bottom: 0.35rem; color: var(--text-muted); font-size: 0.9rem;">
+        📅 <strong>Fecha:</strong> {{ evento.fecha|date:"l d de F de Y" }}
+      </p>
+      <p style="margin-bottom: 0.35rem; color: var(--text-muted); font-size: 0.9rem;">
+        ⏰ <strong>Hora:</strong> {{ evento.hora|time:"H:i" }} hrs ({{ evento.duracion_min }} min)
+      </p>
+      <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+        <span class="status-badge badge-vigente">
+          👥 {{ max_plazas }} plaza(s) disponible(s) de {{ evento.capacidad_maxima }}
+        </span>
+      </p>
+    </div>
+
+    {% if max_plazas == 0 %}
+      <div class="alert-custom warning">
+        <div>⚠️ Este evento no tiene plazas disponibles en este momento.</div>
+      </div>
+      <a href="{% url 'eventos:detalle' pk=evento.pk %}" class="btn-custom btn-secondary-custom btn-block-custom" style="width: 100%;">
+        &larr; Volver al evento
+      </a>
+    {% else %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="plazas">Número de Plazas a Reservar</label>
+          <input
+            type="number"
+            id="plazas"
+            name="plazas"
+            class="form-control-custom"
+            style="font-size: 1.25rem; font-weight: bold; text-align: center;"
+            min="1"
+            max="{{ max_plazas }}"
+            value="1"
+            required
+            autofocus
+          >
+          <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
+            Puedes solicitar entre 1 y {{ max_plazas }} plazas. Se validará la disponibilidad en tiempo real con bloqueo seguro.
+          </small>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <a href="{% url 'eventos:detalle' pk=evento.pk %}" class="btn-custom btn-outline-custom" style="flex: 1;">
+            Cancelar
+          </a>
+          <button type="submit" class="btn-custom btn-primary-custom" style="flex: 1;">
+            Confirmar Reserva
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

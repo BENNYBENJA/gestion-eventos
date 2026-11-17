@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Inscripciones{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main);">🎟️ Mis Inscripciones</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Historial personal de reservas para eventos comunitarios</p>
+  </div>
+  <a href="{% url 'eventos:catalogo' %}" class="btn-custom btn-primary-custom">
+    🔍 Explorar Más Eventos
+  </a>
+</div>
+
+{% if reservas %}
+  <div class="table-card table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Evento</th>
+          <th>Fecha del Evento</th>
+          <th>Plazas</th>
+          <th>Fecha de Reserva</th>
+          <th>Estado</th>
+          <th>Asistencia</th>
+          <th style="text-align: right;">Comprobante</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reservas %}
+        <tr>
+          <td><strong>#{{ r.pk }}</strong></td>
+          <td>
+            <strong>{{ r.evento.nombre }}</strong>
+          </td>
+          <td>{{ r.evento.fecha|date:"d/m/Y" }} {{ r.evento.hora|time:"H:i" }}</td>
+          <td><strong>{{ r.plazas }}</strong></td>
+          <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
+          <td>
+            {% if r.estado == 'VIGENTE' %}
+              <span class="status-badge badge-vigente">Vigente</span>
+            {% else %}
+              <span class="status-badge badge-cancelada">Cancelada</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.asistentes is not None %}
+              <span style="color: var(--success); font-weight: 600;">{{ r.asistentes }} / {{ r.plazas }}</span>
+            {% else %}
+              <span style="color: var(--text-muted);">&mdash;</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            <a href="{% url 'reservas:detalle_reserva' r.pk %}" class="btn-custom btn-outline-custom btn-sm-custom">
+              Ver Detalle
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+    Mostrando {{ reservas|length }} reserva(s).
+  </p>
+{% else %}
+  <div style="text-align: center; padding: 4rem 1rem; background: white; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📅</div>
+    <h3 style="color: var(--text-main); font-weight: 700; margin-bottom: 0.5rem;">No tienes inscripciones activas</h3>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Explora el catálogo para reservar plazas en los talleres y actividades disponibles.</p>
+    <a href="{% url 'eventos:catalogo' %}" class="btn-custom btn-primary-custom">
+      Ver Catálogo de Eventos
+    </a>
+  </div>
+{% endif %}
+{% endblock %}
