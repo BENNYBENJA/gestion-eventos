@@ -1,3 +1,18 @@
+# Core Framework
 Django==5.1.4
 python-decouple==3.8
-mysqlclient==2.2.4
+asgiref==3.8.1
+sqlparse==0.5.3
+
+# Base de datos MySQL
+mysqlclient==2.2.7
+PyMySQL==1.1.1
+cryptography==44.0.0
+
+# Servidor de Producción y Archivos Estáticos
+gunicorn==23.0.0
+whitenoise==6.8.2
+
+# Calidad y Formato de Código
+ruff==0.8.6
+pre-commit==4.0.1
