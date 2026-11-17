@@ -1,0 +1,22 @@
+{
+    email {$ACME_EMAIL:admin@demo.cl}
+}
+
+# Si la variable DOMAIN está definida (ej. eventos.midominio.cl), Caddy emitirá certificados TLS Let's Encrypt automáticamente.
+# Si DOMAIN está vacía, Caddy escucha en :80 por HTTP.
+{$DOMAIN::80} {
+    encode gzip zstd
+
+    # Proxy inverso hacia el servicio web Django (Gunicorn)
+    reverse_proxy web:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

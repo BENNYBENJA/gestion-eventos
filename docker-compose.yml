@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Base de Datos MySQL 8 (Aislada: NO expone puertos al exterior)
+  db:
+    image: mysql:8.0
+    container_name: gestion_eventos_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_super_secure_password_2026}
+      MYSQL_DATABASE: ${DB_NAME:-gestion_eventos}
+      MYSQL_USER: ${DB_USER:-evento_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-evento_secure_password_2026}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # No se publican puertos al host para seguridad; solo visible dentro de la red interna
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - internal_network
+
+  # Aplicación Django + Gunicorn
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gestion_eventos_web
+    restart: always
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-prod-key-community-events-centro-2026-xyz!}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*,localhost,127.0.0.1,web}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost,http://127.0.0.1,https://localhost}
+      - DB_ENGINE=mysql
+      - DB_NAME=${DB_NAME:-gestion_eventos}
+      - DB_USER=${DB_USER:-evento_user}
+      - DB_PASSWORD=${DB_PASSWORD:-evento_secure_password_2026}
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL:-INFO}
+      - SECURE_SSL_REDIRECT=${SECURE_SSL_REDIRECT:-False}
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
+      - CSRF_COOKIE_SECURE=${CSRF_COOKIE_SECURE:-False}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    networks:
+      - internal_network
+
+  # Reverse Proxy Caddy con TLS Automático (Único servicio que expone puertos 80 y 443)
+  caddy:
+    image: caddy:2-alpine
+    container_name: gestion_eventos_caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@demo.cl}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - static_volume:/app/staticfiles:ro
+    depends_on:
+      - web
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume:
+  caddy_data:
+  caddy_config:
