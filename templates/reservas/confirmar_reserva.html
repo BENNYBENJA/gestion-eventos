@@ -15,7 +15,7 @@
     <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
       <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">{{ evento.nombre }}</h3>
       <p style="margin-bottom: 0.35rem; color: var(--text-muted); font-size: 0.9rem;">
-        📅 <strong>Fecha:</strong> {{ evento.fecha|date:"l d de F de Y" }}
+        📅 <strong>Fecha:</strong> {{ evento.fecha|date:"d/m/Y" }}
       </p>
       <p style="margin-bottom: 0.35rem; color: var(--text-muted); font-size: 0.9rem;">
         ⏰ <strong>Hora:</strong> {{ evento.hora|time:"H:i" }} hrs ({{ evento.duracion_min }} min)

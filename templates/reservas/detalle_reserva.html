@@ -19,7 +19,7 @@
       <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">
         {{ reserva.evento.nombre }}
       </h2>
-      <p style="margin-bottom: 0.5rem;"><strong>📅 Fecha:</strong> {{ reserva.evento.fecha|date:"l d de F de Y" }}</p>
+      <p style="margin-bottom: 0.5rem;"><strong>📅 Fecha:</strong> {{ reserva.evento.fecha|date:"d/m/Y" }}</p>
       <p style="margin-bottom: 0.5rem;"><strong>⏰ Hora:</strong> {{ reserva.evento.hora|time:"H:i" }} hrs ({{ reserva.evento.duracion_min }} min)</p>
       <p style="margin-bottom: 0.5rem;"><strong>🎟️ Plazas Reservadas:</strong> {{ reserva.plazas }} persona(s)</p>
       <p style="margin-bottom: 0.5rem;"><strong>👤 Titular:</strong> {{ reserva.usuario.get_full_name|default:reserva.usuario.email }}</p>
