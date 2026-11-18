@@ -20,7 +20,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*,localhost,127.0.0.1,web', cas
 
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost,http://127.0.0.1,http://0.0.0.0,http://web',
+    default='http://localhost,http://127.0.0.1,http://0.0.0.0,http://web,https://*.onrender.com',
     cast=Csv()
 )
 
