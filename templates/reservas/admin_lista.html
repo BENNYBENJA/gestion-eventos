@@ -2,20 +2,24 @@
 {% block title %}Administración de Reservas{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main);">📋 Gestión de Reservas</h1>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">Panel de control administrativo &bull; Registro y control de inscripciones</p>
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
+      <i class="bi bi-card-checklist text-primary me-2"></i>Gestión de Reservas
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">Supervisión de inscripciones, control de aforo, cancelaciones y asistencia</p>
   </div>
 </div>
 
-<!-- Filtros -->
-<div class="filter-card">
-  <form method="get" class="filter-form">
-    <div class="form-group" style="margin-bottom:0;">
-      <label for="evento">Filtrar por Evento</label>
+<!-- Filtros de Búsqueda -->
+<div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.75rem; box-shadow: var(--shadow-sm);">
+  <form method="get" class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label for="evento" style="font-size: 0.825rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+        <i class="bi bi-filter me-1"></i> Filtrar por Evento
+      </label>
       <select name="evento" id="evento" class="form-control-custom">
-        <option value="">-- Todos los eventos --</option>
+        <option value="">— Todos los eventos —</option>
         {% for ev in eventos %}
           <option value="{{ ev.id }}" {% if filtro_evento == ev.id|stringformat:"s" %}selected{% endif %}>
             {{ ev.nombre }} ({{ ev.fecha|date:"d/m/Y" }})
@@ -24,19 +28,27 @@
       </select>
     </div>
 
-    <div class="form-group" style="margin-bottom:0;">
-      <label for="usuario">Buscar por Email de Usuario</label>
-      <input type="text" name="usuario" id="usuario" class="form-control-custom" placeholder="usuario@demo.cl" value="{{ filtro_usuario }}">
+    <div class="col-md-3">
+      <label for="usuario" style="font-size: 0.825rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+        <i class="bi bi-person-search me-1"></i> Email de Usuario
+      </label>
+      <input type="text" name="usuario" id="usuario" class="form-control-custom" placeholder="ej. usuario@demo.cl" value="{{ filtro_usuario }}">
     </div>
 
-    <div class="form-group" style="margin-bottom:0;">
-      <label for="fecha">Fecha del Evento</label>
+    <div class="col-md-3">
+      <label for="fecha" style="font-size: 0.825rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+        <i class="bi bi-calendar-event me-1"></i> Fecha del Evento
+      </label>
       <input type="date" name="fecha" id="fecha" class="form-control-custom" value="{{ filtro_fecha|default:'' }}">
     </div>
 
-    <div style="display: flex; gap: 0.5rem;">
-      <button type="submit" class="btn-custom btn-primary-custom">Filtrar</button>
-      <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-outline-custom">Limpiar</a>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn-custom btn-primary-custom flex-grow-1" style="padding: 0.7rem 0.5rem;">
+        <i class="bi bi-search"></i> Filtrar
+      </button>
+      <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-outline-custom" title="Limpiar filtros">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </a>
     </div>
   </form>
 </div>
@@ -48,11 +60,11 @@
       <tr>
         <th>#ID</th>
         <th>Evento</th>
-        <th>Fecha Evento</th>
-        <th>Usuario</th>
-        <th>Plazas</th>
-        <th>Asistentes</th>
-        <th>Estado</th>
+        <th>Fecha Actividad</th>
+        <th>Titular de Reserva</th>
+        <th style="text-align: center;">Plazas</th>
+        <th style="text-align: center;">Asistencia</th>
+        <th style="text-align: center;">Estado</th>
         <th>Fecha Reserva</th>
         <th style="text-align: right;">Acciones</th>
       </tr>
@@ -64,53 +76,76 @@
           <td>
             <strong>{{ r.evento.nombre }}</strong>
           </td>
-          <td>{{ r.evento.fecha|date:"d/m/Y" }} {{ r.evento.hora|time:"H:i" }}</td>
           <td>
-            {{ r.usuario.get_full_name|default:r.usuario.email }}<br>
-            <small style="color: var(--text-muted);">{{ r.usuario.email }}</small>
+            <div><strong>{{ r.evento.fecha|date:"d/m/Y" }}</strong></div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ r.evento.hora|time:"H:i" }} hrs</div>
           </td>
-          <td><strong>{{ r.plazas }}</strong></td>
           <td>
+            <div><strong>{{ r.usuario.get_full_name|default:r.usuario.email }}</strong></div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ r.usuario.email }}</div>
+          </td>
+          <td style="text-align: center;">
+            <span class="badge bg-primary text-white" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">
+              {{ r.plazas }}
+            </span>
+          </td>
+          <td style="text-align: center;">
             {% if r.asistentes is not None %}
-              <span style="font-weight: 700; color: var(--success);">{{ r.asistentes }} / {{ r.plazas }}</span>
+              <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.85rem;">
+                <i class="bi bi-check-circle-fill me-1"></i>{{ r.asistentes }} / {{ r.plazas }}
+              </span>
             {% else %}
-              <span style="color: var(--text-muted); font-style: italic;">Pendiente</span>
+              <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.8rem;">
+                Pendiente
+              </span>
             {% endif %}
           </td>
-          <td>
+          <td style="text-align: center;">
             {% if r.estado == 'VIGENTE' %}
-              <span class="status-badge badge-vigente">Vigente</span>
+              <span class="status-badge badge-vigente">
+                <i class="bi bi-check-circle-fill"></i> Vigente
+              </span>
             {% else %}
-              <span class="status-badge badge-cancelada">Cancelada</span>
+              <span class="status-badge badge-cancelada">
+                <i class="bi bi-x-circle-fill"></i> Cancelada
+              </span>
               {% if r.cancelada_por %}
-                <br><small style="font-size:0.75rem; color:var(--text-muted);">por {{ r.cancelada_por.email }}</small>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top: 0.2rem;">
+                  por {{ r.cancelada_por.email }}
+                </div>
               {% endif %}
             {% endif %}
           </td>
-          <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
+          <td style="font-size: 0.85rem; color: var(--text-muted);">
+            {{ r.fecha_hora|date:"d/m/Y H:i" }}
+          </td>
           <td style="text-align: right; white-space: nowrap;">
-            {% if r.estado == 'VIGENTE' %}
-              <a href="{% url 'reservas:admin_asistentes' r.id %}" class="btn-custom btn-outline-custom btn-sm-custom" title="Registrar asistencia">
-                👥 Asistencia
-              </a>
-              {% if r.asistentes is None %}
-                <a href="{% url 'reservas:admin_cancelar' r.id %}" class="btn-custom btn-danger-custom btn-sm-custom" title="Cancelar reserva">
-                  ✕ Cancelar
+            <div class="d-inline-flex gap-1">
+              {% if r.estado == 'VIGENTE' %}
+                <a href="{% url 'reservas:admin_asistentes' r.id %}" class="btn-custom btn-outline-custom btn-sm-custom" title="Registrar asistencia de asistentes efectivos">
+                  <i class="bi bi-people-fill text-primary"></i> Asistencia
                 </a>
+                
+                {% if r.asistentes is None %}
+                  <a href="{% url 'reservas:admin_cancelar' r.id %}" class="btn-custom btn-danger-custom btn-sm-custom" title="Cancelar reserva y liberar plazas">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                  </a>
+                {% else %}
+                  <button class="btn-custom btn-sm-custom" disabled style="opacity: 0.45; cursor: not-allowed; background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color);" title="Bloqueado: no se puede cancelar una reserva con asistencia confirmada">
+                    <i class="bi bi-lock-fill"></i> Cancelar
+                  </button>
+                {% endif %}
               {% else %}
-                <button class="btn-custom btn-sm-custom" disabled style="opacity: 0.5; cursor: not-allowed;" title="No se puede cancelar con asistencia registrada">
-                  ✕ Cancelar
-                </button>
+                <span style="font-size: 0.8rem; color: var(--text-light); font-style: italic;">Sin acciones</span>
               {% endif %}
-            {% else %}
-              <span style="font-size: 0.8rem; color: var(--text-muted);">&mdash;</span>
-            {% endif %}
+            </div>
           </td>
         </tr>
       {% empty %}
         <tr>
-          <td colspan="9" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-            No se encontraron reservas con los criterios seleccionados.
+          <td colspan="9" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+            <i class="bi bi-inbox display-4 d-block mb-2 text-light"></i>
+            No se encontraron reservas registradas para los filtros especificados.
           </td>
         </tr>
       {% endfor %}

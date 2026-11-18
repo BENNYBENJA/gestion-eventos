@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Mis Inscripciones{% endblock %}
+{% block title %}Mis Inscripciones — Centro Comunitario{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main);">🎟️ Mis Inscripciones</h1>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">Historial personal de reservas para eventos comunitarios</p>
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
+      <i class="bi bi-ticket-perforated text-primary me-2"></i>Mis Inscripciones
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">Historial personal de reservas en actividades comunitarias</p>
   </div>
   <a href="{% url 'eventos:catalogo' %}" class="btn-custom btn-primary-custom">
-    🔍 Explorar Más Eventos
+    <i class="bi bi-search me-1"></i> Explorar Más Eventos
   </a>
 </div>
 
@@ -20,11 +22,11 @@
         <tr>
           <th>#ID</th>
           <th>Evento</th>
-          <th>Fecha del Evento</th>
-          <th>Plazas</th>
+          <th>Fecha de la Actividad</th>
+          <th style="text-align: center;">Plazas</th>
           <th>Fecha de Reserva</th>
-          <th>Estado</th>
-          <th>Asistencia</th>
+          <th style="text-align: center;">Estado</th>
+          <th style="text-align: center;">Asistencia</th>
           <th style="text-align: right;">Comprobante</th>
         </tr>
       </thead>
@@ -35,26 +37,41 @@
           <td>
             <strong>{{ r.evento.nombre }}</strong>
           </td>
-          <td>{{ r.evento.fecha|date:"d/m/Y" }} {{ r.evento.hora|time:"H:i" }}</td>
-          <td><strong>{{ r.plazas }}</strong></td>
-          <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
           <td>
+            <div><strong>{{ r.evento.fecha|date:"d/m/Y" }}</strong></div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ r.evento.hora|time:"H:i" }} hrs</div>
+          </td>
+          <td style="text-align: center;">
+            <span class="badge bg-primary text-white" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">
+              {{ r.plazas }}
+            </span>
+          </td>
+          <td style="font-size: 0.85rem; color: var(--text-muted);">
+            {{ r.fecha_hora|date:"d/m/Y H:i" }}
+          </td>
+          <td style="text-align: center;">
             {% if r.estado == 'VIGENTE' %}
-              <span class="status-badge badge-vigente">Vigente</span>
+              <span class="status-badge badge-vigente">
+                <i class="bi bi-check-circle-fill"></i> Vigente
+              </span>
             {% else %}
-              <span class="status-badge badge-cancelada">Cancelada</span>
+              <span class="status-badge badge-cancelada">
+                <i class="bi bi-x-circle-fill"></i> Cancelada
+              </span>
             {% endif %}
           </td>
-          <td>
+          <td style="text-align: center;">
             {% if r.asistentes is not None %}
-              <span style="color: var(--success); font-weight: 600;">{{ r.asistentes }} / {{ r.plazas }}</span>
+              <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.85rem;">
+                <i class="bi bi-check-circle-fill me-1"></i>{{ r.asistentes }} / {{ r.plazas }}
+              </span>
             {% else %}
-              <span style="color: var(--text-muted);">&mdash;</span>
+              <span style="color: var(--text-muted); font-size: 0.85rem;">&mdash;</span>
             {% endif %}
           </td>
           <td style="text-align: right;">
             <a href="{% url 'reservas:detalle_reserva' r.pk %}" class="btn-custom btn-outline-custom btn-sm-custom">
-              Ver Detalle
+              <i class="bi bi-file-earmark-text me-1"></i> Ver Detalle
             </a>
           </td>
         </tr>
@@ -62,16 +79,20 @@
       </tbody>
     </table>
   </div>
-  <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
-    Mostrando {{ reservas|length }} reserva(s).
-  </p>
+  <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem;">
+    Mostrando <strong>{{ reservas|length }}</strong> reserva(s) registrada(s).
+  </div>
 {% else %}
-  <div style="text-align: center; padding: 4rem 1rem; background: white; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📅</div>
-    <h3 style="color: var(--text-main); font-weight: 700; margin-bottom: 0.5rem;">No tienes inscripciones activas</h3>
-    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Explora el catálogo para reservar plazas en los talleres y actividades disponibles.</p>
+  <div style="text-align: center; padding: 4.5rem 1.5rem; background: white; border-radius: var(--radius-xl); border: 1px dashed var(--border-color); box-shadow: var(--shadow-sm);">
+    <div style="width: 70px; height: 70px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 1.25rem;">
+      <i class="bi bi-ticket-perforated"></i>
+    </div>
+    <h3 style="color: var(--text-main); font-weight: 800; margin-bottom: 0.5rem;">No tienes inscripciones activas</h3>
+    <p style="color: var(--text-muted); max-width: 440px; margin: 0 auto 1.5rem;">
+      Explora el catálogo de eventos comunitarios para inscribirte en talleres, actividades y cursos disponibles.
+    </p>
     <a href="{% url 'eventos:catalogo' %}" class="btn-custom btn-primary-custom">
-      Ver Catálogo de Eventos
+      <i class="bi bi-calendar3 me-1"></i> Ver Catálogo de Eventos
     </a>
   </div>
 {% endif %}

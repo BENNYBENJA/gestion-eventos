@@ -1,45 +1,59 @@
 {% extends 'base.html' %}
-{% block title %}Confirmar Cancelación de Reserva{% endblock %}
+{% block title %}Confirmar Cancelación de Reserva #{{ reserva.id }}{% endblock %}
 
 {% block content %}
-<div class="auth-wrapper" style="max-width: 550px;">
-  <div class="auth-card" style="border-top: 4px solid var(--danger);">
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-      <span style="font-size: 3rem;">⚠️</span>
-      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--danger); margin-top: 0.5rem;">
+<div class="auth-wrapper" style="max-width: 580px;">
+  
+  <div style="margin-bottom: 1.25rem;">
+    <a href="{% url 'reservas:admin_reservas' %}" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none; font-weight: 600;">
+      <i class="bi bi-arrow-left me-1"></i> Volver a la lista de reservas
+    </a>
+  </div>
+
+  <div class="auth-card" style="border-top: 5px solid var(--danger);">
+    <div style="text-align: center; margin-bottom: 1.75rem;">
+      <div style="width: 56px; height: 56px; background: #fee2e2; color: var(--danger); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--danger); margin-bottom: 0.25rem;">
         ¿Cancelar Reserva #{{ reserva.id }}?
       </h1>
-      <p style="color: var(--text-muted); font-size: 0.95rem;">
-        Esta acción liberará <strong>{{ reserva.plazas }} plaza(s)</strong> para el evento.
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Esta acción liberará inmediatamente <strong>{{ reserva.plazas }} plaza(s)</strong> para el evento.
       </p>
     </div>
 
-    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
-      <p><strong>Evento:</strong> {{ reserva.evento.nombre }}</p>
-      <p><strong>Fecha y Hora:</strong> {{ reserva.evento.fecha|date:"d/m/Y" }} a las {{ reserva.evento.hora|time:"H:i" }}</p>
-      <p><strong>Usuario:</strong> {{ reserva.usuario.email }} ({{ reserva.usuario.get_full_name }})</p>
-      <p><strong>Plazas reservadas:</strong> {{ reserva.plazas }}</p>
-      <p><strong>Fecha de inscripción:</strong> {{ reserva.fecha_hora|date:"d/m/Y H:i" }}</p>
+    <div style="background: var(--surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+      <div style="margin-bottom: 0.4rem;"><strong>Evento:</strong> {{ reserva.evento.nombre }}</div>
+      <div style="margin-bottom: 0.4rem;"><strong>Fecha:</strong> {{ reserva.evento.fecha|date:"d/m/Y" }} a las {{ reserva.evento.hora|time:"H:i" }} hrs</div>
+      <div style="margin-bottom: 0.4rem;"><strong>Usuario Titular:</strong> {{ reserva.usuario.email }} ({{ reserva.usuario.get_full_name }})</div>
+      <div style="margin-bottom: 0.4rem;"><strong>Plazas Contratadas:</strong> {{ reserva.plazas }}</div>
+      <div><strong>Inscrito el:</strong> {{ reserva.fecha_hora|date:"d/m/Y H:i" }}</div>
     </div>
 
     {% if reserva.asistentes is not None %}
-      <div class="alert-custom error">
-        <div>❌ Esta reserva ya tiene asistencia registrada ({{ reserva.asistentes }} asistentes). La regla de negocio prohíbe cancelarla.</div>
+      <div class="alert-custom danger mb-4">
+        <div class="alert-content">
+          <i class="bi bi-shield-x"></i>
+          <div>
+            <strong>Operación Bloqueada:</strong> Esta reserva ya tiene asistencia efectiva registrada ({{ reserva.asistentes }} asistentes). La regla de negocio prohíbe cancelarla.
+          </div>
+        </div>
       </div>
       <div style="text-align: center;">
         <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-secondary-custom">
-          &larr; Volver al listado
+          <i class="bi bi-arrow-left me-1"></i> Volver al listado
         </a>
       </div>
     {% else %}
       <form method="post">
         {% csrf_token %}
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-          <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-outline-custom">
+        <div style="display: flex; gap: 1rem;">
+          <a href="{% url 'reservas:admin_reservas' %}" class="btn-custom btn-outline-custom" style="flex: 1;">
             No, volver
           </a>
-          <button type="submit" class="btn-custom btn-danger-custom">
-            Sí, cancelar y liberar plazas
+          <button type="submit" class="btn-custom btn-danger-custom" style="flex: 1.4;">
+            <i class="bi bi-x-circle me-1"></i> Sí, Cancelar Reserva
           </button>
         </div>
       </form>

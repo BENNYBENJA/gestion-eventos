@@ -1,249 +1,198 @@
 {% extends "base.html" %}
 
-{% block title %}📊 Reportes — Gestión de Eventos{% endblock %}
+{% block title %}Reportes de Ocupación y Asistencia — Administración{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-
-  <!-- Encabezado -->
-  <div class="d-flex align-items-center mb-4">
-    <div class="me-3">
-      <span style="font-size:2.5rem;">📊</span>
-    </div>
-    <div>
-      <h1 class="h2 mb-0 fw-bold">Reportes</h1>
-      <p class="text-muted mb-0">Visualiza ocupación y asistencia de tus eventos</p>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
+      <i class="bi bi-bar-chart-line text-primary me-2"></i>Reportes y Métricas
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">Análisis de ocupación, asistencia efectiva y aforo por actividad (Patrón Factory)</p>
   </div>
+</div>
 
-  <!-- Mensajes de error -->
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags|default:'danger' }} alert-dismissible fade show" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  {% endfor %}
-
-  <!-- Formulario de filtros -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white py-3">
-      <h5 class="mb-0"><i class="bi bi-funnel-fill me-2"></i>Filtros</h5>
-    </div>
-    <div class="card-body">
-      <form method="get" action="">
-        <div class="row g-3 align-items-end">
-
-          <!-- Tipo de reporte -->
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Tipo de Reporte</label>
-            <div class="d-flex gap-3">
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="tipo" id="tipo_ocupacion"
-                       value="ocupacion" {% if tipo == 'ocupacion' %}checked{% endif %}>
-                <label class="form-check-label" for="tipo_ocupacion">
-                  🏟️ Ocupación
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="tipo" id="tipo_asistencia"
-                       value="asistencia" {% if tipo == 'asistencia' %}checked{% endif %}>
-                <label class="form-check-label" for="tipo_asistencia">
-                  👥 Asistencia
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Evento -->
-          <div class="col-12 col-md-4">
-            <label for="evento" class="form-label fw-semibold">Evento</label>
-            <select name="evento" id="evento" class="form-select">
-              <option value="">— Todos los eventos —</option>
-              {% for ev in eventos %}
-                <option value="{{ ev.pk }}" {% if filtro_evento == ev.pk|stringformat:"s" %}selected{% endif %}>
-                  {{ ev.nombre }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <!-- Rango de fechas -->
-          <div class="col-6 col-md-2">
-            <label for="fecha_inicio" class="form-label fw-semibold">Desde</label>
-            <input type="date" name="fecha_inicio" id="fecha_inicio"
-                   class="form-control" value="{{ fecha_inicio }}">
-          </div>
-          <div class="col-6 col-md-2">
-            <label for="fecha_fin" class="form-label fw-semibold">Hasta</label>
-            <input type="date" name="fecha_fin" id="fecha_fin"
-                   class="form-control" value="{{ fecha_fin }}">
-          </div>
-
-          <!-- Botón -->
-          <div class="col-12 mt-2">
-            <button type="submit" class="btn btn-primary px-4">
-              <i class="bi bi-bar-chart-fill me-2"></i>Generar Reporte
-            </button>
-            <a href="{% url 'reportes:home' %}" class="btn btn-outline-secondary ms-2">
-              <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
-            </a>
-          </div>
+<!-- Filtros de Reporte -->
+<div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+  <form method="get" action="">
+    <div class="row g-3 align-items-end">
+      
+      <!-- Selector de Tipo de Reporte con estilo Pills -->
+      <div class="col-12 col-md-4">
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem;">
+          Tipo de Reporte
+        </label>
+        <div style="display: flex; gap: 0.75rem; background: var(--surface-alt); padding: 0.35rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.75rem; margin: 0; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.875rem; font-weight: 700; {% if tipo == 'ocupacion' %}background: white; color: var(--primary); box-shadow: var(--shadow-xs);{% else %}color: var(--text-muted);{% endif %}">
+            <input type="radio" name="tipo" value="ocupacion" {% if tipo == 'ocupacion' %}checked{% endif %} style="display: none;" onchange="this.form.submit()">
+            <i class="bi bi-pie-chart-fill"></i> Ocupación
+          </label>
+          <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.75rem; margin: 0; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.875rem; font-weight: 700; {% if tipo == 'asistencia' %}background: white; color: var(--primary); box-shadow: var(--shadow-xs);{% else %}color: var(--text-muted);{% endif %}">
+            <input type="radio" name="tipo" value="asistencia" {% if tipo == 'asistencia' %}checked{% endif %} style="display: none;" onchange="this.form.submit()">
+            <i class="bi bi-people-fill"></i> Asistencia
+          </label>
         </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Resultados del reporte -->
-  {% if datos_reporte %}
-
-    <div class="card shadow-sm">
-      <div class="card-header d-flex align-items-center justify-content-between py-3
-                  {% if datos_reporte.tipo == 'ocupacion' %}bg-info text-white{% else %}bg-success text-white{% endif %}">
-        <h5 class="mb-0">
-          {% if datos_reporte.tipo == 'ocupacion' %}
-            🏟️
-          {% else %}
-            👥
-          {% endif %}
-          {{ datos_reporte.titulo }}
-        </h5>
-        {% if not datos_reporte.sin_datos %}
-          <span class="badge bg-white text-dark">
-            {{ datos_reporte.filas|length }} evento{{ datos_reporte.filas|length|pluralize }}
-          </span>
-        {% endif %}
       </div>
 
-      <div class="card-body p-0">
+      <!-- Selector de Evento -->
+      <div class="col-12 col-md-3">
+        <label for="evento" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem;">
+          Evento
+        </label>
+        <select name="evento" id="evento" class="form-control-custom">
+          <option value="">— Todos los eventos —</option>
+          {% for ev in eventos %}
+            <option value="{{ ev.pk }}" {% if filtro_evento == ev.pk|stringformat:"s" %}selected{% endif %}>
+              {{ ev.nombre }} ({{ ev.fecha|date:"d/m/Y" }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-        {% if datos_reporte.sin_datos %}
-          <!-- Sin datos -->
-          <div class="text-center py-5">
-            <span style="font-size:3rem;">🔍</span>
-            <p class="text-muted mt-3 mb-0 fs-5">No hay datos para los filtros seleccionados.</p>
-            <p class="text-muted small">Intenta ajustar el rango de fechas o selecciona un evento diferente.</p>
-          </div>
+      <!-- Rango de Fechas -->
+      <div class="col-6 col-md-2">
+        <label for="fecha_inicio" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem;">
+          Desde
+        </label>
+        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control-custom" value="{{ fecha_inicio }}">
+      </div>
 
-        {% elif datos_reporte.tipo == 'ocupacion' %}
-          <!-- Tabla de Ocupación -->
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Evento</th>
-                  <th>Fecha</th>
-                  <th class="text-center">Capacidad</th>
-                  <th class="text-center">Reservadas</th>
-                  <th class="text-center">Disponibles</th>
-                  <th style="min-width:200px;">% Ocupación</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for fila in datos_reporte.filas %}
-                  <tr>
-                    <td class="fw-semibold">{{ fila.evento.nombre }}</td>
-                    <td class="text-muted">{{ fila.evento.fecha|date:"d/m/Y" }}</td>
-                    <td class="text-center">{{ fila.capacidad }}</td>
-                    <td class="text-center">
-                      <span class="badge bg-primary rounded-pill">{{ fila.plazas_vigentes }}</span>
-                    </td>
-                    <td class="text-center">
-                      {% if fila.disponibles > 0 %}
-                        <span class="badge bg-success rounded-pill">{{ fila.disponibles }}</span>
-                      {% else %}
-                        <span class="badge bg-danger rounded-pill">{{ fila.disponibles }}</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="progress flex-grow-1" style="height:18px; border-radius:9px;">
-                          <div class="progress-bar
-                            {% if fila.porcentaje >= 90 %}bg-danger
-                            {% elif fila.porcentaje >= 70 %}bg-warning
-                            {% else %}bg-success
-                            {% endif %}"
-                            role="progressbar"
-                            style="width: {{ fila.porcentaje }}%;"
-                            aria-valuenow="{{ fila.porcentaje }}"
-                            aria-valuemin="0" aria-valuemax="100">
-                          </div>
-                        </div>
-                        <span class="fw-bold text-nowrap" style="min-width:48px; text-align:right;">
-                          {{ fila.porcentaje }}%
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+      <div class="col-6 col-md-2">
+        <label for="fecha_fin" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem;">
+          Hasta
+        </label>
+        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control-custom" value="{{ fecha_fin }}">
+      </div>
 
-          <!-- Resumen Ocupación -->
-          <div class="bg-light border-top px-4 py-3">
-            <div class="row g-3 text-center">
-              {% with total_cap=datos_reporte.filas|length %}
-              <div class="col-6 col-md-3">
-                <div class="fw-bold fs-4 text-primary">{{ datos_reporte.filas|length }}</div>
-                <div class="text-muted small">Eventos</div>
-              </div>
-              {% endwith %}
-            </div>
-          </div>
-
-        {% elif datos_reporte.tipo == 'asistencia' %}
-          <!-- Tabla de Asistencia -->
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Evento</th>
-                  <th>Fecha</th>
-                  <th class="text-center">Plazas Totales</th>
-                  <th class="text-center">Asistentes Registrados</th>
-                  <th class="text-center">Pendientes de Registro</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for fila in datos_reporte.filas %}
-                  <tr>
-                    <td class="fw-semibold">{{ fila.evento.nombre }}</td>
-                    <td class="text-muted">{{ fila.evento.fecha|date:"d/m/Y" }}</td>
-                    <td class="text-center">
-                      <span class="badge bg-secondary rounded-pill">{{ fila.total_plazas }}</span>
-                    </td>
-                    <td class="text-center">
-                      <span class="badge bg-success rounded-pill">{{ fila.total_asistentes }}</span>
-                    </td>
-                    <td class="text-center">
-                      {% if fila.pendientes_registro > 0 %}
-                        <span class="badge bg-warning text-dark rounded-pill">
-                          ⚠️ {{ fila.pendientes_registro }}
-                        </span>
-                      {% else %}
-                        <span class="badge bg-success rounded-pill">✔ 0</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Resumen Asistencia -->
-          <div class="bg-light border-top px-4 py-3">
-            <div class="row g-3 text-center">
-              <div class="col-6 col-md-3">
-                <div class="fw-bold fs-4 text-success">{{ datos_reporte.filas|length }}</div>
-                <div class="text-muted small">Eventos</div>
-              </div>
-            </div>
-          </div>
-        {% endif %}
-
-      </div><!-- card-body -->
-    </div><!-- card -->
-
-  {% endif %}
+      <!-- Botón Generar -->
+      <div class="col-12 col-md-1 d-flex gap-2">
+        <button type="submit" class="btn-custom btn-primary-custom w-100" style="padding: 0.7rem 0.5rem;" title="Generar reporte">
+          <i class="bi bi-funnel-fill"></i>
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
+
+<!-- Resultados del Reporte -->
+{% if datos_reporte %}
+  {% if not datos_reporte.sin_datos %}
+    
+    <!-- Título y Tipo de Reporte -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0;">
+        {% if tipo == 'ocupacion' %}
+          <i class="bi bi-pie-chart text-primary me-2"></i>Resultados de Ocupación
+        {% else %}
+          <i class="bi bi-people text-primary me-2"></i>Resultados de Asistencia Efectiva
+        {% endif %}
+      </h2>
+      <span class="badge bg-primary text-white" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+        {{ datos_reporte.filas|length }} evento{{ datos_reporte.filas|length|pluralize }} evaluado{{ datos_reporte.filas|length|pluralize }}
+      </span>
+    </div>
+
+    <!-- Tabla según Tipo -->
+    {% if tipo == 'ocupacion' %}
+      <div class="table-card table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Fecha</th>
+              <th style="text-align: center;">Capacidad Máxima</th>
+              <th style="text-align: center;">Plazas Vigentes</th>
+              <th style="text-align: center;">Plazas Libres</th>
+              <th style="width: 250px;">Porcentaje de Ocupación</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fila in datos_reporte.filas %}
+              <tr>
+                <td>
+                  <strong>{{ fila.evento.nombre }}</strong>
+                </td>
+                <td>{{ fila.evento.fecha|date:"d/m/Y" }} {{ fila.evento.hora|time:"H:i" }}</td>
+                <td style="text-align: center; font-weight: 700;">{{ fila.capacidad }}</td>
+                <td style="text-align: center;">
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.85rem;">
+                    {{ fila.plazas_vigentes }}
+                  </span>
+                </td>
+                <td style="text-align: center;">
+                  {% if fila.disponibles == 0 %}
+                    <span class="badge bg-danger text-white">0 libres</span>
+                  {% else %}
+                    <span class="badge bg-success text-white">{{ fila.disponibles }} libres</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress-track-saas flex-grow-1" style="height: 9px;">
+                      <div 
+                        class="progress-fill-saas {% if fila.porcentaje >= 90 %}red{% elif fila.porcentaje >= 70 %}yellow{% else %}green{% endif %}" 
+                        style="width: {{ fila.porcentaje }}%;"
+                      ></div>
+                    </div>
+                    <strong style="min-width: 48px; font-size: 0.85rem; text-align: right;">{{ fila.porcentaje }}%</strong>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% elif tipo == 'asistencia' %}
+      <div class="table-card table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Fecha</th>
+              <th style="text-align: center;">Total Plazas Reservadas</th>
+              <th style="text-align: center;">Asistentes Registrados</th>
+              <th style="text-align: center;">Reservas Pendientes de Registro</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fila in datos_reporte.filas %}
+              <tr>
+                <td>
+                  <strong>{{ fila.evento.nombre }}</strong>
+                </td>
+                <td>{{ fila.evento.fecha|date:"d/m/Y" }} {{ fila.evento.hora|time:"H:i" }}</td>
+                <td style="text-align: center; font-weight: 700;">{{ fila.total_plazas }}</td>
+                <td style="text-align: center;">
+                  <span class="badge bg-success text-white" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                    <i class="bi bi-person-check-fill me-1"></i>{{ fila.total_asistentes }} asistentes
+                  </span>
+                </td>
+                <td style="text-align: center;">
+                  {% if fila.pendientes_registro > 0 %}
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.85rem;">
+                      <i class="bi bi-clock-history me-1"></i>{{ fila.pendientes_registro }} pendiente{{ fila.pendientes_registro|pluralize }}
+                    </span>
+                  {% else %}
+                    <span class="badge bg-light text-muted border" style="font-size: 0.85rem;">
+                      <i class="bi bi-check2-all me-1"></i>Al día
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <!-- Sin datos para los filtros -->
+    <div style="text-align: center; padding: 4rem; background: white; border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+      <i class="bi bi-clipboard2-x display-4 text-muted"></i>
+      <h4 style="margin-top: 1rem; color: var(--text-main);">Sin datos registrados</h4>
+      <p style="color: var(--text-muted); margin: 0;">No se encontraron registros para los criterios de filtrado seleccionados.</p>
+    </div>
+  {% endif %}
+{% endif %}
 {% endblock %}

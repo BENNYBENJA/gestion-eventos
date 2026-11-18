@@ -1,175 +1,137 @@
 {% extends "base.html" %}
 
-{% block title %}{{ accion }} Evento{% endblock %}
+{% block title %}{{ accion }} Evento — Administración{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width:720px;">
-
-  <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'eventos:admin_eventos' %}">Gestión de Eventos</a></li>
-      <li class="breadcrumb-item active">{{ accion }} Evento</li>
-    </ol>
-  </nav>
-
-  <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
-    <div class="card-header py-3 px-4" style="background:linear-gradient(135deg,#0d6efd,#6610f2);">
-      <h4 class="text-white fw-bold mb-0">
-        <i class="bi bi-{% if accion == 'Crear' %}plus-circle{% else %}pencil-square{% endif %} me-2"></i>
-        {{ accion }} Evento
-      </h4>
-    </div>
-
-    <div class="card-body p-4">
-
-      {% if messages %}
-      {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
-        {{ msg }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-      {% endfor %}
-      {% endif %}
-
-      <form method="post" novalidate>
-        {% csrf_token %}
-
-        <div class="row g-3">
-
-          <!-- Nombre -->
-          <div class="col-12">
-            <label for="nombre" class="form-label fw-semibold">
-              Nombre <span class="text-danger">*</span>
-            </label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              class="form-control form-control-lg"
-              placeholder="Ej: Taller de Django"
-              value="{{ evento.nombre|default:'' }}"
-              maxlength="200"
-              required
-            >
-          </div>
-
-          <!-- Fecha y Hora -->
-          <div class="col-sm-6">
-            <label for="fecha" class="form-label fw-semibold">
-              Fecha <span class="text-danger">*</span>
-            </label>
-            <input
-              type="date"
-              id="fecha"
-              name="fecha"
-              class="form-control"
-              value="{{ evento.fecha|date:'Y-m-d'|default:'' }}"
-              required
-            >
-          </div>
-          <div class="col-sm-6">
-            <label for="hora" class="form-label fw-semibold">
-              Hora <span class="text-danger">*</span>
-            </label>
-            <input
-              type="time"
-              id="hora"
-              name="hora"
-              class="form-control"
-              value="{{ evento.hora|time:'H:i'|default:'' }}"
-              required
-            >
-          </div>
-
-          <!-- Duración y Capacidad -->
-          <div class="col-sm-6">
-            <label for="duracion_min" class="form-label fw-semibold">
-              Duración (minutos) <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <input
-                type="number"
-                id="duracion_min"
-                name="duracion_min"
-                class="form-control"
-                placeholder="60"
-                value="{{ evento.duracion_min|default:'' }}"
-                min="1"
-                required
-              >
-              <span class="input-group-text">min</span>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <label for="capacidad_maxima" class="form-label fw-semibold">
-              Capacidad máxima <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-people"></i></span>
-              <input
-                type="number"
-                id="capacidad_maxima"
-                name="capacidad_maxima"
-                class="form-control"
-                placeholder="100"
-                value="{{ evento.capacidad_maxima|default:'' }}"
-                min="1"
-                required
-              >
-            </div>
-            {% if evento and evento.pk %}
-            <div class="form-text text-warning">
-              <i class="bi bi-exclamation-triangle me-1"></i>
-              No puede reducirse por debajo de las plazas ya reservadas.
-            </div>
-            {% endif %}
-          </div>
-
-          <!-- Descripción -->
-          <div class="col-12">
-            <label for="descripcion" class="form-label fw-semibold">Descripción</label>
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              class="form-control"
-              rows="4"
-              placeholder="Descripción opcional del evento..."
-            >{{ evento.descripcion|default:'' }}</textarea>
-          </div>
-
-          <!-- Activo -->
-          <div class="col-12">
-            <div class="form-check form-switch">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                id="activo"
-                name="activo"
-                {% if evento.activo or not evento %}checked{% endif %}
-              >
-              <label class="form-check-label fw-semibold" for="activo">
-                Publicar evento (visible en el catálogo)
-              </label>
-            </div>
-          </div>
-
-        </div><!-- /row -->
-
-        <hr class="my-4">
-
-        <div class="d-flex gap-2 justify-content-end">
-          <a href="{% url 'eventos:admin_eventos' %}" class="btn btn-outline-secondary px-4">
-            <i class="bi bi-x-lg me-1"></i>Cancelar
-          </a>
-          <button type="submit" class="btn btn-primary px-5 fw-semibold">
-            <i class="bi bi-{% if accion == 'Crear' %}plus-lg{% else %}check-lg{% endif %} me-1"></i>
-            {{ accion }}
-          </button>
-        </div>
-
-      </form>
-    </div>
+<div class="auth-wrapper" style="max-width: 680px;">
+  
+  <div style="margin-bottom: 1.25rem;">
+    <a href="{% url 'eventos:admin_eventos' %}" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none; font-weight: 600;">
+      <i class="bi bi-arrow-left me-1"></i> Volver al listado de eventos
+    </a>
   </div>
 
+  <div class="auth-card" style="padding: 2.25rem;">
+    <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.75rem;">
+      <div class="auth-icon-badge" style="margin: 0; width: 44px; height: 44px; font-size: 1.2rem;">
+        <i class="bi bi-calendar-{% if accion == 'Crear' %}plus{% else %}check{% endif %}"></i>
+      </div>
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0;">{{ accion }} Evento</h1>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Ingresa los datos del evento comunitario</p>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="nombre"><i class="bi bi-card-heading me-1 text-muted"></i> Nombre del Evento *</label>
+        <input 
+          type="text" 
+          id="nombre" 
+          name="nombre" 
+          class="form-control-custom" 
+          placeholder="Ej. Taller de Huerto Comunitario" 
+          value="{{ evento.nombre|default:'' }}" 
+          required
+        >
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6 form-group">
+          <label for="fecha"><i class="bi bi-calendar-event me-1 text-muted"></i> Fecha *</label>
+          <input 
+            type="date" 
+            id="fecha" 
+            name="fecha" 
+            class="form-control-custom" 
+            value="{{ evento.fecha|date:'Y-m-d'|default:'' }}" 
+            required
+          >
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label for="hora"><i class="bi bi-clock me-1 text-muted"></i> Hora de Inicio *</label>
+          <input 
+            type="time" 
+            id="hora" 
+            name="hora" 
+            class="form-control-custom" 
+            value="{{ evento.hora|time:'H:i'|default:'' }}" 
+            required
+          >
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6 form-group">
+          <label for="duracion_min"><i class="bi bi-hourglass-split me-1 text-muted"></i> Duración (minutos) *</label>
+          <input 
+            type="number" 
+            id="duracion_min" 
+            name="duracion_min" 
+            class="form-control-custom" 
+            min="1" 
+            placeholder="Ej. 120" 
+            value="{{ evento.duracion_min|default:'60' }}" 
+            required
+          >
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label for="capacidad_maxima"><i class="bi bi-people me-1 text-muted"></i> Capacidad Máxima (plazas) *</label>
+          <input 
+            type="number" 
+            id="capacidad_maxima" 
+            name="capacidad_maxima" 
+            class="form-control-custom" 
+            min="1" 
+            placeholder="Ej. 30" 
+            value="{{ evento.capacidad_maxima|default:'30' }}" 
+            required
+          >
+          <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+            No se puede reducir por debajo de plazas ya vigentes.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion"><i class="bi bi-text-paragraph me-1 text-muted"></i> Descripción del Evento</label>
+        <textarea 
+          id="descripcion" 
+          name="descripcion" 
+          class="form-control-custom" 
+          rows="4" 
+          placeholder="Detalles sobre qué aprenderán, qué deben traer los asistentes, etc."
+        >{{ evento.descripcion|default:'' }}</textarea>
+      </div>
+
+      <div class="form-group mb-4">
+        <div style="display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem; background: var(--surface-alt); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <input 
+            type="checkbox" 
+            id="activo" 
+            name="activo" 
+            style="width: 18px; height: 18px; cursor: pointer;"
+            {% if evento is None or evento.activo %}checked{% endif %}
+          >
+          <label for="activo" style="margin: 0; cursor: pointer; font-weight: 600;">
+            Evento activo y visible en el catálogo público
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'eventos:admin_eventos' %}" class="btn-custom btn-outline-custom" style="flex: 1;">
+          Cancelar
+        </a>
+        <button type="submit" class="btn-custom btn-primary-custom" style="flex: 1.5;">
+          <i class="bi bi-check-circle me-1"></i> Guardar Evento
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
