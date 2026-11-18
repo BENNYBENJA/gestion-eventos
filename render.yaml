@@ -14,9 +14,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: "*.onrender.com,localhost,127.0.0.1"
+        value: "*"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://*.onrender.com"
+        value: "https://*.onrender.com,https://gestion-eventos-centro-comunitario.onrender.com"
       - key: DB_ENGINE
         value: "sqlite"
       - key: SQLITE_NAME

@@ -16,13 +16,16 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-prod-key-community-ev
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*,localhost,127.0.0.1,web', cast=Csv())
+ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost,http://127.0.0.1,http://0.0.0.0,http://web,https://*.onrender.com',
-    cast=Csv()
-)
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'https://gestion-eventos-centro-comunitario.onrender.com',
+    'http://localhost',
+    'http://127.0.0.1',
+    'http://0.0.0.0',
+    'http://web',
+]
 
 # Application definition
 INSTALLED_APPS = [
