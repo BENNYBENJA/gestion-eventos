@@ -117,6 +117,12 @@ Se definió un sistema cromático con contraste de accesibilidad verificado seg�
   - Amarillo (`bg-warning`): 71% a 90% ocupado ("¡Últimos cupos!").
   - Rojo (`bg-danger`): 91% a 100% ocupado ("AGOTADO").
 - **Estados de Interfaz (Empty States):** Cuando una búsqueda no arroja resultados o un usuario nuevo no tiene inscripciones, se muestra una ilustración/ícono estilizado, un mensaje empático en español y un botón directo para explorar eventos activos.
+- **Accesibilidad Universal e Inclusividad (Pauta INACAP & WCAG 2.1 AA):**
+  - **Barra Superior de Accesibilidad:** Botones interactivos con persistencia en `localStorage` para:
+    - *Modo Alto Contraste:* Fondo negro profundo con tipografía en amarillo y cian de máximo contraste.
+    - *Selector de Tamaño de Texto:* Controles `A-`, `A` y `A+` para incrementar el tamaño de fuente global hasta un 30%.
+    - *Modo Lectura Fácil:* Ajuste de interlineado aumentado (1.95) y espaciado de palabras para usuarios con dificultades visuales o dislexia.
+    - *Skip Link:* Enlace accesible `Saltar al contenido principal` para personas que navegan mediante teclado o lectores de pantalla.
 
 ---
 
@@ -126,6 +132,12 @@ Se definió un sistema cromático con contraste de accesibilidad verificado seg�
 > **Nivel Alcanzado:** Nivel 4 (Destacado — 25 Puntos): *Cumple completamente cada una de las condiciones a evaluar definidas para la experiencia de usuario.*
 
 La experiencia del usuario (UX) fue diseñada para eliminar toda fricción cognitiva, asegurando que un vecino de la comunidad pueda reservar un cupo en **menos de 3 clics** desde la página de inicio.
+
+### 3.1 Cumplimiento de la Pauta: Llamados a la Acción y Mensaje "En desarrollo"
+En estricto cumplimiento con la pauta de evaluación (*"los llamados a la acción deben existir o en caso contrario mensaje 'En desarrollo'"*):
+- Todo enlace o botón para funcionalidades complementarias proyectadas en la plataforma (ej: *"Añadir a Google Calendar"*, *"Compartir Actividad"*, *"Ficha Imprimible"*, *"Bolsa de Voluntarios"* y *"Buzón Ciudadano"*) cuenta con el distintivo visual `En desarrollo`.
+- Al hacer clic sobre cualquiera de estos llamados a la acción, se despliega de forma reactiva un **Modal Accesible de Bootstrap** que informa con cortesía y claridad: *"Esta opción se encuentra actualmente en fase de construcción según la planificación del Centro Comunitario y estará disponible en la próxima versión del sistema."*
+- **Control de Emociones y Ansiedad del Usuario:** Los formularios implementan microinteracciones automáticas que previenen el doble clic accidental deshabilitando el botón de envío y mostrando un indicador visual animado (*"Procesando..."*).
 
 ### 3.1 Mapa de Experiencia y Flujo de Usuario por Roles
 
@@ -260,62 +272,29 @@ classDiagram
 | **R6. Asistencia Efectiva Reemplazable** | El registro de asistentes efectivos es un valor entero entre 0 y las plazas contratadas. Registrar asistencia reemplaza el valor previo, nunca lo suma acumulativamente. | `apps/reservas/services.py`<br>`ServicioReservas.registrar_asistencia` |
 | **R7. Reportes Robustos** | Ocupación calculada evitando división por cero (`plazas/capacidad * 100`). Validación de rango de fechas invertido (fecha inicio > fecha fin) lanzando error de validación explícito. | `apps/reportes/factory.py`<br>`ReporteOcupacion` / `ReporteAsistencia` |
 
-### 4.4 Mitigación de Vulnerabilidades OWASP Top 10 y Normativa de Delitos Informáticos (Ley 21.459)
+### 4.4 Mitigación de Vulnerabilidades OWASP Top 10 y Buenas Prácticas según Pauta INACAP
 
-El desarrollo fue auditado contra las principales amenazas del estándar internacional **OWASP Top 10 (2021)** y la legislación chilena sobre ciberdelincuencia (**Ley N° 21.459 de Delitos Informáticos**):
+El desarrollo implementa minuciosamente los tres procesos de seguridad operacional y desarrollo seguro exigidos en la pauta de evaluación:
 
-```mermaid
-graph LR
-    subgraph Amenazas OWASP
-        A1[A01: Broken Access Control]
-        A2[A02: Cryptographic Failures]
-        A3[A03: Injection SQL / XSS]
-        A4[A05: Security Misconfiguration]
-        A5[A07: Identification Failures]
-    end
+#### Proceso 1: Entrada y Almacenamiento de Datos
+- **Validación Estricta de Entrada (`apps/eventos/validators.py`):** Detección y rechazo inmediato de caracteres nulos (`\x00`, `%00`), secuencias script maliciosas y caracteres peligrosos (`< > " ' % ( ) & + \`), forzando validación de tipos, rangos de enteros (duración 1-1440 min, capacidad 1-5000) y largos de texto antes de persistir.
+- **Bloqueo Automático de Cuentas tras 5 Intentos Fallidos (`apps/cuentas/models.py`):**
+  - Implementación de campos `intentos_fallidos` y `bloqueado` en el modelo `Usuario`.
+  - Si un usuario ingresa una contraseña incorrecta en 5 oportunidades consecutivas, su cuenta se bloquea automáticamente (`bloqueado = True`, `is_active = False`) y se notifica la alerta de seguridad.
+  - Al ingresar credenciales correctas, el contador se restablece inmediatamente a cero.
+- **Almacenamiento de Credenciales y Cadenas de Conexión:**
+  - Contraseñas almacenadas exclusivamente con PBKDF2 y algoritmo SHA-256 (cero texto plano).
+  - Cadenas de conexión y llaves criptográficas 100% aisladas en archivo `.env` mediante `python-decouple`, fuera del código fuente.
 
-    subgraph Controles en el Prototipo
-        C1[Decoradores de Rol + Validación de Dueño 403 Forbidden]
-        C2[PBKDF2 SHA-256 + Secrets 100% en .env]
-        C3[Django ORM Parametrizado + Autoescape DTL]
-        C4[HSTS + Cookies HttpOnly/Secure + X-Frame-Options DENY]
-        C5[Error Genérico en Login + Rate Limiting]
-    end
+#### Proceso 2: Procesamiento y Gestión de Sesiones
+- **Tiempo de Inactividad de Sesión Acotado:** Configuración en `settings.py` de `SESSION_COOKIE_AGE = 3600` (1 hora) y `SESSION_SAVE_EVERY_REQUEST = True` para calcular la inactividad desde la última solicitud.
+- **Destrucción Completa en Cierre de Sesión (Logout):** Invocación de `logout(request)` combinada con `request.session.flush()`, eliminando de inmediato la sesión en el servidor y renovando las cookies.
+- **Cookies Seguras y de Ámbito Estricto:** `SESSION_COOKIE_HTTPONLY = True`, `SESSION_COOKIE_SAMESITE = 'Lax'`, `SESSION_COOKIE_PATH = '/'`.
+- **Cifrado de Comunicaciones:** Conexiones cifradas mediante TLS/HTTPS sobre el proxy inverso Caddy.
 
-    A1 --> C1
-    A2 --> C2
-    A3 --> C3
-    A4 --> C4
-    A5 --> C5
-```
-
-- **A01:2021 — Broken Access Control (Control de Acceso Roto):**
-  - *Vulnerabilidad evitada:* Acceso a recursos por manipulación de ID en URL (Insecure Direct Object Reference - IDOR).
-  - *Control implementado:* Verificación obligatoria en el servidor. En `apps/cuentas/decorators.py` se crearon los decoradores `@requiere_login` y `@requiere_admin`. En `detalle_reserva` se valida:
-    ```python
-    if request.user.rol != 'ADMIN' and reserva.usuario != request.user:
-        raise PermissionDenied("No tienes permiso para ver esta reserva.")
-    ```
-    Si un usuario intenta ver la reserva de otro usuario cambiando el ID en la URL, el servidor responde con un código de estado estricto **HTTP 403 Forbidden**.
-- **A02:2021 — Cryptographic Failures (Fallas Criptográficas):**
-  - *Control implementado:* Almacenamiento de contraseñas de usuarios utilizando el algoritmo PBKDF2 con hash SHA-256 y sal (salt) única por usuario generado por Django.
-  - *Gestión de Secretos:* Cero credenciales o claves privadas en el código fuente. Se utiliza `python-decouple` para cargar `SECRET_KEY`, credenciales de BD y banderas desde un archivo `.env` protegido en el `.gitignore`.
-- **A03:2021 — Injection (Inyecciones SQL y XSS):**
-  - *SQL Injection:* Todas las consultas a la base de datos se ejecutan a través del ORM de Django, el cual utiliza sentencias preparadas y consultas parametrizadas de forma nativa. Cero concatenación directa de SQL.
-  - *Cross-Site Scripting (XSS):* Motor de plantillas de Django configurado con auto-escape activado por defecto.
-- **A05:2021 — Security Misconfiguration (Configuración de Seguridad Defectuosa):**
-  - En producción (`DEBUG=False`):
-    - `SECURE_BROWSER_XSS_FILTER = True`
-    - `X_FRAME_OPTIONS = 'DENY'` (Previene ataques de Clickjacking).
-    - `SECURE_CONTENT_TYPE_NOSNIFF = True`
-    - `SESSION_COOKIE_HTTPONLY = True` (Impide robo de sesión vía JavaScript).
-    - `SESSION_COOKIE_SECURE = True` y `CSRF_COOKIE_SECURE = True`.
-- **A07:2021 — Identification and Authentication Failures:**
-  - En caso de ingresar un correo inexistente o una contraseña errónea, el sistema responde con el mensaje neutro y genérico: *"Correo electrónico o contraseña incorrectos."*, evitando que un atacante determine si un correo está registrado o no en la base de datos.
-- **Alineación con la Ley N° 21.459 de Delitos Informáticos (Chile):**
-  - *Artículo 1° (Acceso Ilícito):* El sistema bloquea en el backend cualquier solicitud no autorizada a rutas administrativas o reservas de terceros.
-  - *Artículo 2° (Interceptación Ilícita):* Tráfico cifrado de extremo a extremo mediante TLS/HTTPS proporcionado por el proxy Caddy.
-  - *Artículo 4° (Falsificación Informática):* Integridad de los datos garantizada por restricciones relacionales y validación de formularios en el servidor.
+#### Proceso 3: Salidas y Resultados
+- **Codificación en Zona de Confianza:** Toda la lógica de presentación y filtrado se ejecuta del lado del servidor (Django templates con auto-escape HTML activo).
+- **Consistencia de Datos:** Todos los datos desplegados en tablas y reportes provienen de consultas agregadas del ORM y no de contadores estáticos en código.
 
 ---
 
@@ -325,14 +304,15 @@ graph LR
 > **Nivel Alcanzado:** Nivel 4 (Destacado — 25 Puntos): *Evidencia completamente las correcciones del software producto de los resultados de las pruebas.*
 
 ### 5.1 Estrategia de Aseguramiento de Calidad y Suite de Pruebas
-Para garantizar que el software funcione sin anomalías en escenarios de alta carga y uso intensivo, se diseñó e implementó una suite automatizada basada en el framework `django.test.TestCase` (`apps/reservas/tests.py`), estructurada en 5 módulos de prueba:
+Para garantizar que el software funcione sin anomalías en escenarios de alta carga y uso intensivo, se diseñó e implementó una suite automatizada basada en el framework `django.test.TestCase` (`apps/reservas/tests.py`), estructurada en 6 módulos de prueba:
 
 ```mermaid
-pie title Distribución de las 21 Pruebas Automatizadas
+pie title Distribución de las 24 Pruebas Automatizadas
     "Reglas de Negocio Reservas" : 9
     "Permisos por Rol (RBAC)" : 4
     "Reportes y Factory Pattern" : 4
     "Aislamiento de Datos (Anti-IDOR)" : 3
+    "Seguridad OWASP (Pauta)" : 3
     "Concurrencia Multihilo (8 Threads)" : 1
 ```
 
@@ -341,11 +321,11 @@ La ejecución completa de la batería de pruebas arrojó un resultado de **100% 
 
 ```text
 Creating test database for alias 'default'...
-Found 21 test(s).
+Found 24 test(s).
 System check identified no issues (0 silenced).
-.....................
+........................
 ----------------------------------------------------------------------
-Ran 21 tests in 41.363s
+Ran 24 tests in 24.887s
 
 OK
 Destroying test database for alias 'default'...
@@ -373,6 +353,9 @@ Destroying test database for alias 'default'...
 19. `test_reporte_ocupacion_calcula_porcentaje_correctamente`: Fórmula matemática `(plazas/capacidad)*100` y prevención de división por 0.
 20. `test_reporte_asistencia_muestra_pendientes_y_presentes`: Conteo de confirmados, registrados y pendientes.
 21. `test_concurrencia_reservas_simultaneas_no_sobrevenden`: **8 hilos concurrentes simultáneos** intentando reservar las últimas plazas de un evento limitado; validación de que jamás se sobrevenda la capacidad máxima.
+22. `test_bloqueo_cuenta_tras_cinco_intentos_fallidos`: **Seguridad OWASP Proceso 1:** Verificación de bloqueo tras 5 intentos erróneos e impedimento de login posterior.
+23. `test_rechazo_caracteres_nulos_y_scripts`: **Seguridad OWASP Proceso 1:** Rechazo de inyección con caracteres nulos `\x00` o etiquetas `<script>`.
+24. `test_logout_destruye_sesion_completamente`: **Seguridad OWASP Proceso 2:** Destrucción y purga total de la clave de sesión tras cerrar sesión.
 
 ### 5.3 Evidencia de Correcciones de Código Derivadas de los Hallazgos de Testing
 

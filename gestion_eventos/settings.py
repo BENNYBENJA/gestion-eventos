@@ -146,6 +146,21 @@ if not DEBUG:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Gestión de Sesiones y Cookies (OWASP Proceso 2)
+# ─────────────────────────────────────────────────────────────────────────────
+# Tiempo de inactividad de sesión corto (balance riesgo/negocio: 1 hora)
+SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', default=3600, cast=int)
+SESSION_SAVE_EVERY_REQUEST = True  # Renueva inactividad con cada interacción
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_PATH = '/'
+
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_PATH = '/'
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Ajustes de Seguridad para Producción (cuando DEBUG=False)
 # ─────────────────────────────────────────────────────────────────────────────
 if not DEBUG:

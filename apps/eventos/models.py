@@ -21,6 +21,18 @@ class Evento(models.Model):
     
     def __str__(self):
         return f"{self.nombre} ({self.fecha})"
+
+    def clean(self):
+        super().clean()
+        from .validators import validar_texto_seguro, validar_rango_entero
+        if self.nombre:
+            self.nombre = validar_texto_seguro(self.nombre, campo="Nombre de evento", max_len=200)
+        if self.descripcion:
+            self.descripcion = validar_texto_seguro(self.descripcion, campo="Descripción", max_len=2000)
+        if self.duracion_min:
+            validar_rango_entero(self.duracion_min, "Duración (minutos)", 1, 1440)
+        if self.capacidad_maxima:
+            validar_rango_entero(self.capacidad_maxima, "Capacidad máxima", 1, 5000)
     
     @property
     def plazas_disponibles(self):

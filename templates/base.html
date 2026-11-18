@@ -20,8 +20,31 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body>
+  <!-- Enlace de accesibilidad para saltar navegación (WCAG 2.1) -->
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Barra de Accesibilidad e Inclusión Ciudadana (Pauta Evaluación INACAP) -->
+  <aside class="accessibility-bar" aria-label="Herramientas de Accesibilidad">
+    <div class="a11y-info d-none d-md-flex align-items-center">
+      <i class="bi bi-universal-access me-1 text-warning"></i>
+      <span>Portal Inclusivo &bull; Centro Comunitario</span>
+    </div>
+    <div class="a11y-controls ms-auto">
+      <span class="text-white-50 me-1 d-none d-sm-inline">Accesibilidad:</span>
+      <button type="button" class="a11y-btn" id="btn-contraste" title="Alternar Modo Alto Contraste">
+        <i class="bi bi-circle-half"></i> Contraste
+      </button>
+      <button type="button" class="a11y-btn" id="btn-font-dec" title="Disminuir tamaño de texto">A-</button>
+      <button type="button" class="a11y-btn" id="btn-font-reset" title="Restablecer tamaño de texto">A</button>
+      <button type="button" class="a11y-btn" id="btn-font-inc" title="Aumentar tamaño de texto">A+</button>
+      <button type="button" class="a11y-btn" id="btn-lectura" title="Modo de lectura fácil y espaciado">
+        <i class="bi bi-fonts"></i> Lectura Fácil
+      </button>
+    </div>
+  </aside>
+
   <!-- Barra de navegación profesional con efecto Glassmorphism -->
-  <nav class="main-navbar">
+  <nav class="main-navbar" role="navigation" aria-label="Navegación principal">
     <div class="nav-container">
       <a href="/" class="nav-brand">
         <div class="brand-logo-icon">
@@ -99,9 +122,9 @@
   </nav>
 
   <!-- Mensajes flash del sistema -->
-  <main class="page-container">
+  <main class="page-container" id="contenido-principal" role="main">
     {% if messages %}
-      <div class="messages-container">
+      <div class="messages-container" aria-live="polite">
         {% for message in messages %}
           <div class="alert-custom {% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
             <div class="alert-content">
@@ -127,9 +150,22 @@
     {% endblock %}
   </main>
 
-  <!-- Pie de página elegante -->
-  <footer class="main-footer">
+  <!-- Pie de página elegante con llamados a la acción comunitarios -->
+  <footer class="main-footer" role="contentinfo">
     <div class="container text-center">
+      <div class="footer-links mb-3 d-flex justify-content-center gap-3 flex-wrap">
+        <a href="#" class="text-decoration-none btn-en-desarrollo text-muted small">
+          <i class="bi bi-heart me-1"></i> Bolsa de Voluntarios <span class="badge-en-desarrollo">En desarrollo</span>
+        </a>
+        <span class="text-muted small">&bull;</span>
+        <a href="#" class="text-decoration-none btn-en-desarrollo text-muted small">
+          <i class="bi bi-chat-square-dots me-1"></i> Buzón Ciudadano <span class="badge-en-desarrollo">En desarrollo</span>
+        </a>
+        <span class="text-muted small">&bull;</span>
+        <a href="#" class="text-decoration-none btn-en-desarrollo text-muted small">
+          <i class="bi bi-file-earmark-text me-1"></i> Reglamento del Centro <span class="badge-en-desarrollo">En desarrollo</span>
+        </a>
+      </div>
       <div class="footer-brand mb-2">
         <i class="bi bi-buildings text-primary me-2"></i>
         <strong>Centro Comunitario</strong> &bull; Sistema de Gestión de Eventos y Reservas
@@ -140,7 +176,127 @@
     </div>
   </footer>
 
+  <!-- Modal Global de "Funcionalidad en Desarrollo" (Pauta Evaluación INACAP) -->
+  <div class="modal fade" id="modalEnDesarrollo" tabindex="-1" aria-labelledby="modalEnDesarrolloLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0 rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center px-4 pb-4">
+          <div class="mb-3 text-warning">
+            <i class="bi bi-cone-striped" style="font-size: 3.5rem;"></i>
+          </div>
+          <h4 class="fw-bold text-dark mb-2" id="modalEnDesarrolloLabel">Funcionalidad en Desarrollo</h4>
+          <p class="text-secondary mb-4">
+            Esta opción se encuentra actualmente en fase de construcción según la planificación del Centro Comunitario y estará disponible en la próxima versión del sistema.
+          </p>
+          <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold" data-bs-dismiss="modal">
+            <i class="bi bi-check2 me-1"></i> Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Script de Accesibilidad, Microinteracciones y Modales -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 1. Manejo del Modal Global "En Desarrollo"
+      var modalElement = document.getElementById('modalEnDesarrollo');
+      var bsModal = modalElement ? new bootstrap.Modal(modalElement) : null;
+      document.querySelectorAll('.btn-en-desarrollo').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (bsModal) bsModal.show();
+        });
+      });
+
+      // 2. Controles de Accesibilidad
+      var btnContraste = document.getElementById('btn-contraste');
+      var btnFontInc = document.getElementById('btn-font-inc');
+      var btnFontDec = document.getElementById('btn-font-dec');
+      var btnFontReset = document.getElementById('btn-font-reset');
+      var btnLectura = document.getElementById('btn-lectura');
+
+      // Cargar preferencias guardadas
+      if (localStorage.getItem('a11y_contraste') === 'true') {
+        document.body.classList.add('alto-contraste');
+        if (btnContraste) btnContraste.classList.add('active');
+      }
+      var savedFontSize = localStorage.getItem('a11y_fontsize');
+      if (savedFontSize) {
+        document.body.classList.add(savedFontSize);
+      }
+      if (localStorage.getItem('a11y_lectura') === 'true') {
+        document.body.classList.add('modo-lectura');
+        if (btnLectura) btnLectura.classList.add('active');
+      }
+
+      // Alternar Alto Contraste
+      if (btnContraste) {
+        btnContraste.addEventListener('click', function() {
+          var isHigh = document.body.classList.toggle('alto-contraste');
+          btnContraste.classList.toggle('active', isHigh);
+          localStorage.setItem('a11y_contraste', isHigh);
+        });
+      }
+
+      // Tamaño de fuente
+      if (btnFontInc) {
+        btnFontInc.addEventListener('click', function() {
+          if (!document.body.classList.contains('font-lg') && !document.body.classList.contains('font-xl')) {
+            document.body.classList.add('font-lg');
+            localStorage.setItem('a11y_fontsize', 'font-lg');
+          } else if (document.body.classList.contains('font-lg')) {
+            document.body.classList.remove('font-lg');
+            document.body.classList.add('font-xl');
+            localStorage.setItem('a11y_fontsize', 'font-xl');
+          }
+        });
+      }
+      if (btnFontDec) {
+        btnFontDec.addEventListener('click', function() {
+          if (document.body.classList.contains('font-xl')) {
+            document.body.classList.remove('font-xl');
+            document.body.classList.add('font-lg');
+            localStorage.setItem('a11y_fontsize', 'font-lg');
+          } else if (document.body.classList.contains('font-lg')) {
+            document.body.classList.remove('font-lg');
+            localStorage.removeItem('a11y_fontsize');
+          }
+        });
+      }
+      if (btnFontReset) {
+        btnFontReset.addEventListener('click', function() {
+          document.body.classList.remove('font-lg', 'font-xl');
+          localStorage.removeItem('a11y_fontsize');
+        });
+      }
+
+      // Modo Lectura Fácil
+      if (btnLectura) {
+        btnLectura.addEventListener('click', function() {
+          var isLectura = document.body.classList.toggle('modo-lectura');
+          btnLectura.classList.toggle('active', isLectura);
+          localStorage.setItem('a11y_lectura', isLectura);
+        });
+      }
+
+      // 3. Prevenir doble envío y dar feedback visual en formularios
+      document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+          var submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn && !submitBtn.disabled) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Procesando...';
+          }
+        });
+      });
+    });
+  </script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

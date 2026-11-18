@@ -283,3 +283,74 @@ class TestConcurrenciaReservas(TransactionTestCase):
         self.assertGreater(plazas_totales, 0, "Al menos una reserva debió concretarse")
         self.assertTrue(len(self.exitos) >= 1)
         self.assertEqual(plazas_totales, len(self.exitos) * 2)
+
+
+class TestSeguridadOWASP(TestCase):
+    """Pruebas para las buenas prácticas de seguridad OWASP según pauta de evaluación."""
+
+    def setUp(self):
+        self.client = Client()
+        self.usuario = Usuario.objects.create_user(
+            username='owasp_user',
+            email='owasp@demo.cl',
+            password='PasswordSeguro123!'
+        )
+
+    def test_bloqueo_cuenta_tras_cinco_intentos_fallidos(self):
+        """Pauta OWASP Proceso 1: Bloquear cuenta tras 5 intentos inválidos."""
+        # 4 intentos fallidos
+        for _ in range(4):
+            resp = self.client.post('/cuentas/login/', {'email': 'owasp@demo.cl', 'password': 'clave_incorrecta'})
+            self.assertEqual(resp.status_code, 200)
+
+        self.usuario.refresh_from_db()
+        self.assertEqual(self.usuario.intentos_fallidos, 4)
+        self.assertFalse(self.usuario.bloqueado)
+
+        # 5to intento fallido activa el bloqueo
+        resp = self.client.post('/cuentas/login/', {'email': 'owasp@demo.cl', 'password': 'clave_incorrecta'})
+        self.usuario.refresh_from_db()
+        self.assertEqual(self.usuario.intentos_fallidos, 5)
+        self.assertTrue(self.usuario.bloqueado)
+        self.assertFalse(self.usuario.is_active)
+
+        # Intento posterior con la contraseña correcta debe ser rechazado por cuenta bloqueada
+        resp = self.client.post('/cuentas/login/', {'email': 'owasp@demo.cl', 'password': 'PasswordSeguro123!'})
+        self.assertContains(resp, 'bloqueada temporalmente por seguridad')
+
+    def test_rechazo_caracteres_nulos_y_scripts(self):
+        """Pauta OWASP Proceso 1: Rechazo de caracteres nulos y secuencias script."""
+        from apps.eventos.models import Evento
+        from django.core.exceptions import ValidationError
+
+        evento_nulo = Evento(
+            nombre="Taller con caracter nulo\x00peligroso",
+            fecha=date(2026, 12, 1),
+            hora=time(10, 0),
+            duracion_min=60,
+            capacidad_maxima=20
+        )
+        with self.assertRaises(ValidationError):
+            evento_nulo.full_clean()
+
+        evento_xss = Evento(
+            nombre="Taller <script>alert(1)</script>",
+            fecha=date(2026, 12, 1),
+            hora=time(10, 0),
+            duracion_min=60,
+            capacidad_maxima=20
+        )
+        with self.assertRaises(ValidationError):
+            evento_xss.full_clean()
+
+    def test_logout_destruye_sesion_completamente(self):
+        """Pauta OWASP Proceso 2: Logout termina completamente con la sesión asociada."""
+        self.client.login(username='owasp@demo.cl', password='PasswordSeguro123!')
+        session_key_antes = self.client.session.session_key
+        self.assertIsNotNone(session_key_antes)
+
+        # Logout
+        resp = self.client.post('/cuentas/logout/')
+        self.assertEqual(resp.status_code, 302)
+        # La sesión anterior ya no debe ser válida
+        self.assertNotEqual(self.client.session.session_key, session_key_antes)
