@@ -14,7 +14,6 @@
 **Ramo / Nivel:** Proyecto de Desarrollo de Software / Prototipo Funcional  
 **Fecha de Entrega:** Noviembre 2026  
 **Sede:** INACAP  
-**Calificación esperada según Rúbrica:** Nivel 4 (Destacado — 100 Puntos)
 
 ---
 

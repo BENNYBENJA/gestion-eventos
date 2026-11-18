@@ -512,7 +512,6 @@ def build_full_html(body_html):
 
     <div class="cover-title-box">
         <span class="cover-badge">Evaluación Integral de Prototipo Funcional</span>
-        <span class="cover-badge-destacado">Nivel 4: Destacado (100 Pts)</span>
         <div class="cover-main-title">INFORME TÉCNICO DE CONSTRUCCIÓN, EVALUACIÓN DE INTERFAZ (UI/UX), SEGURIDAD OWASP Y VALIDACIÓN TESTING (ISO 27000)</div>
         <div class="cover-subtitle">Sistema de Gestión de Eventos y Reservas para Centro Comunitario</div>
     </div>
@@ -530,10 +529,6 @@ def build_full_html(body_html):
             <div class="meta-row">
                 <div class="meta-label">Docente Evaluador:</div>
                 <div class="meta-val">Comisión de Evaluación Académica INACAP</div>
-            </div>
-            <div class="meta-row">
-                <div class="meta-label">Puntaje Esperado según Rúbrica:</div>
-                <div class="meta-val"><strong>100 Puntos / 100 Puntos (Calificación 7.0 - Destacado)</strong></div>
             </div>
             <div class="meta-row">
                 <div class="meta-label">Fecha y Sede:</div>
