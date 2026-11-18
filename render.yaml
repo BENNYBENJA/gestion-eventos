@@ -4,8 +4,8 @@ services:
     runtime: python
     plan: free
     region: oregon
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn gestion_eventos.wsgi:application"
+    buildCommand: "bash ./build.sh"
+    startCommand: "gunicorn gestion_eventos.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
@@ -17,7 +17,7 @@ services:
         value: "*.onrender.com,localhost,127.0.0.1"
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://*.onrender.com"
-      - key: USE_MYSQL
-        value: "False"
+      - key: DB_ENGINE
+        value: "sqlite"
       - key: SQLITE_NAME
         value: "db.sqlite3"
